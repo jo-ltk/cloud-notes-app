@@ -7,31 +7,209 @@ on:
   pull_request:
     branches: [main]
 
+# Must match terraform/variables.tf default and provider.tf
 env:
   AWS_REGION: us-east-1
+  TF_WORKING_DIR: terraform
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   terraform:
     name: Terraform Validate & Plan
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     defaults:
       run:
-        working-directory: terraform
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # -----------------------------------------------------------------------
+      # Phase 1: Context & secret preflight (never prints secret values)
+      # -----------------------------------------------------------------------
+      - name: Debug — workflow context
+        working-directory: .
+        run: |
+          set -euo pipefail
+          echo "=== GitHub Actions context ==="
+          echo "Repository (secrets MUST be defined on THIS repo): ${GITHUB_REPOSITORY}"
+          echo "Workflow: ${GITHUB_WORKFLOW}"
+          echo "Event: ${GITHUB_EVENT_NAME}"
+          echo "Ref: ${GITHUB_REF}"
+          echo "Actor: ${GITHUB_ACTOR}"
+          echo "Runner OS: ${RUNNER_OS}"
+          echo "AWS_REGION (workflow env): ${AWS_REGION}"
+          echo "Terraform working directory: ${TF_WORKING_DIR}"
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            echo "PR head repo: ${{ github.event.pull_request.head.repo.full_name }}"
+            echo "PR base repo: ${GITHUB_REPOSITORY}"
+            if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${GITHUB_REPOSITORY}" ]; then
+              echo "::warning::Fork pull request — GitHub does not inject repository secrets into fork PR workflows."
+            fi
+          fi
+          if [ ! -d "${TF_WORKING_DIR}" ]; then
+            echo "::error::Terraform directory '${TF_WORKING_DIR}' not found at repo root."
+            exit 1
+          fi
+          if [ ! -f "${TF_WORKING_DIR}/provider.tf" ]; then
+            echo "::error::Missing ${TF_WORKING_DIR}/provider.tf"
+            exit 1
+          fi
+          if [ ! -f "${TF_WORKING_DIR}/environments/dev/terraform.tfvars" ]; then
+            echo "::error::Missing ${TF_WORKING_DIR}/environments/dev/terraform.tfvars"
+            exit 1
+          fi
+          echo "Terraform paths: OK"
+
+      - name: Debug Secrets Presence
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        working-directory: .
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          set -euo pipefail
+          echo "=== Secret presence (values never logged) ==="
+
+          if [ -z "${AWS_ACCESS_KEY_ID}" ]; then
+            echo "AWS_ACCESS_KEY_ID is EMPTY"
+          else
+            echo "AWS_ACCESS_KEY_ID exists"
+          fi
+
+          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+            echo "AWS_SECRET_ACCESS_KEY is EMPTY"
+          else
+            echo "AWS_SECRET_ACCESS_KEY exists"
+          fi
+
+      - name: Validate repository secrets (fail-fast)
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        working-directory: .
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          set -euo pipefail
+          echo "=== Secret validation (length/format only) ==="
+          failed=0
+
+          # Trim accidental whitespace/newlines from copy-paste
+          AWS_ACCESS_KEY_ID="$(printf '%s' "${AWS_ACCESS_KEY_ID}" | tr -d '[:space:]')"
+          AWS_SECRET_ACCESS_KEY="$(printf '%s' "${AWS_SECRET_ACCESS_KEY}" | tr -d '[:space:]')"
+
+          if [ -z "${AWS_ACCESS_KEY_ID}" ]; then
+            echo "::error title=Missing AWS_ACCESS_KEY_ID::Secret is empty or not defined for '${GITHUB_REPOSITORY}'."
+            echo "Add at: https://github.com/${GITHUB_REPOSITORY}/settings/secrets/actions"
+            echo "Name must be exactly: AWS_ACCESS_KEY_ID"
+            echo "Common mistake: secrets on parent repo (terraform-project) while CI runs on cloud-notes-app."
+            failed=1
+          elif [ "${#AWS_ACCESS_KEY_ID}" -lt 16 ]; then
+            echo "::error::AWS_ACCESS_KEY_ID length (${#AWS_ACCESS_KEY_ID}) looks invalid (expected ~20)."
+            failed=1
+          else
+            echo "AWS_ACCESS_KEY_ID: present (${#AWS_ACCESS_KEY_ID} chars after trim)"
+            case "${AWS_ACCESS_KEY_ID}" in
+              AKIA*|ASIA*) echo "AWS_ACCESS_KEY_ID prefix: OK" ;;
+              *) echo "::warning::AWS_ACCESS_KEY_ID does not start with AKIA/ASIA — verify IAM key." ;;
+            esac
+          fi
+
+          if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
+            echo "::error title=Missing AWS_SECRET_ACCESS_KEY::Secret is empty or not defined for '${GITHUB_REPOSITORY}'."
+            echo "Name must be exactly: AWS_SECRET_ACCESS_KEY"
+            failed=1
+          elif [ "${#AWS_SECRET_ACCESS_KEY}" -lt 30 ]; then
+            echo "::error::AWS_SECRET_ACCESS_KEY length (${#AWS_SECRET_ACCESS_KEY}) looks invalid (expected 40)."
+            failed=1
+          else
+            echo "AWS_SECRET_ACCESS_KEY: present (${#AWS_SECRET_ACCESS_KEY} chars after trim)"
+          fi
+
+          if [ "${failed}" -ne 0 ]; then
+            echo "::error::Stopping before configure-aws-credentials — empty inputs cause 'Could not load credentials from any providers'."
+            exit 1
+          fi
+
+      - name: Skip AWS (fork PR — secrets not available)
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        working-directory: .
+        run: |
+          echo "::notice::Skipping AWS credential setup and terraform plan for fork PR."
+          echo "fmt/init/validate still run; plan requires secrets on same-repo PRs or pushes."
+
+      # -----------------------------------------------------------------------
+      # Phase 2: AWS credentials (same-repo pushes & PRs only)
+      # -----------------------------------------------------------------------
       - name: Configure AWS Credentials
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
+          mask-aws-account-id: true
+          unset-current-credentials: true
 
+      - name: Verify AWS credentials
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        working-directory: .
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
+        run: |
+          set -euo pipefail
+          echo "=== AWS environment (masked; presence only) ==="
+          for var in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_REGION AWS_DEFAULT_REGION; do
+            if [ -n "${!var:-}" ]; then
+              echo "${var}: set"
+            else
+              echo "${var}: not set"
+            fi
+          done
+
+          echo "=== aws configure list ==="
+          aws configure list
+
+          echo "=== aws sts get-caller-identity ==="
+          aws sts get-caller-identity
+
+          echo "=== AWS CLI version ==="
+          aws --version
+
+      # -----------------------------------------------------------------------
+      # Phase 3: Terraform
+      # -----------------------------------------------------------------------
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.5.7
+          terraform_wrapper: false
+
+      - name: Debug — Terraform environment
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+        run: |
+          set -euo pipefail
+          echo "=== Terraform toolchain ==="
+          terraform version
+          echo "Working directory: $(pwd)"
+          echo "AWS_REGION: ${AWS_REGION}"
+          for var in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN; do
+            if [ -n "${!var:-}" ]; then
+              echo "${var}: set"
+            else
+              echo "${var}: not set"
+            fi
+          done
 
       - name: Terraform Format Check
         run: terraform fmt -check -recursive
@@ -43,11 +221,16 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan -input=false
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+          AWS_DEFAULT_REGION: ${{ env.AWS_REGION }}
+        run: terraform plan -input=false -var-file=environments/dev/terraform.tfvars -no-color
 
   docker:
     name: Build Docker Images
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
