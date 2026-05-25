@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: cloud-notes-backend:latest
+          image: cloud-notes-app-backend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
@@ -50,7 +50,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: cloud-notes-frontend:latest
+          image: cloud-notes-app-frontend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
