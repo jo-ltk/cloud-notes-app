@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+
+# Next.js
+frontend/.next/
+frontend/out/
+
+# Env & secrets
+.env
+.env.local
+.env*.local
+
+# Database (local dev; use volume in Docker)
+backend/database.db
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars.backup
+.terraform.lock.hcl
+
+# OS
+.DS_Store
+Thumbs.db

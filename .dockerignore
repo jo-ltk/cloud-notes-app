@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+.github
+terraform
+terragrunt
+kubernetes
+*.md
+.env
+.env.local
+__pycache__
+*.pyc
+.terraform
+*.tfstate
+*.tfstate.*

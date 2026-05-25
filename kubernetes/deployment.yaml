@@ -1,0 +1,59 @@
+# Deploy frontend and backend with 2 replicas each
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-notes-backend
+  labels:
+    app: cloud-notes-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cloud-notes-backend
+  template:
+    metadata:
+      labels:
+        app: cloud-notes-backend
+    spec:
+      containers:
+        - name: backend
+          image: cloud-notes-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          env:
+            - name: DATABASE_PATH
+              value: /app/database.db
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-notes-frontend
+  labels:
+    app: cloud-notes-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cloud-notes-frontend
+  template:
+    metadata:
+      labels:
+        app: cloud-notes-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: cloud-notes-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NEXT_PUBLIC_API_URL
+              value: http://cloud-notes-backend:5000

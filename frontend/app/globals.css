@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+  }
+}
+
+/* Consistent pill rounding — matches "Add note" button */
+@layer components {
+  .ui-shell {
+    @apply overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm ring-1 ring-slate-900/[0.03];
+  }
+
+  .ui-field {
+    @apply w-full rounded-full border border-slate-100 bg-slate-50/40 px-4 py-2.5 text-left text-sm text-slate-900 placeholder:text-left placeholder:text-slate-400 transition-all duration-200 focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/15 disabled:opacity-60;
+  }
+
+  .ui-btn-primary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.98];
+  }
+
+  .ui-btn-secondary {
+    @apply inline-flex items-center justify-center rounded-full border border-slate-100 bg-white px-5 py-2.5 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-50 disabled:opacity-60;
+  }
+
+  .ui-btn-ghost {
+    @apply rounded-full px-4 py-2 text-sm font-medium text-slate-500 transition-colors duration-200 hover:bg-slate-100 hover:text-slate-700;
+  }
+
+  .ui-btn-icon {
+    @apply flex shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm shadow-blue-600/25 transition-transform duration-200 hover:scale-105;
+  }
+
+  .ui-btn-icon-dark {
+    @apply flex items-center justify-center rounded-full bg-slate-900 text-white shadow-sm transition-transform duration-200 hover:scale-105 hover:bg-slate-800 active:scale-95;
+  }
+
+  .ui-note-card {
+    @apply relative flex flex-col overflow-hidden rounded-3xl p-3 shadow-sm ring-1 ring-black/[0.04] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md sm:p-3.5;
+  }
+
+  .ui-alert {
+    @apply rounded-full border border-amber-200/80 bg-amber-50 px-5 py-3 text-sm text-amber-900 shadow-sm;
+  }
+}
+
+@layer utilities {
+  .animate-in {
+    animation: modal-in 0.2s ease-out;
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

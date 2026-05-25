@@ -1,0 +1,31 @@
+# Run frontend + backend together for local development
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    ports:
+      # 5001 avoids clash with local "python app.py" on 5000 (Windows localhost → Docker)
+      - "5001:5000"
+    volumes:
+      # Persist SQLite data on the host
+      - backend-data:/app
+    environment:
+      - DATABASE_PATH=/app/database.db
+      - FLASK_DEBUG=0
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:5001
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5001
+
+volumes:
+  backend-data:
