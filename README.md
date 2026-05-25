@@ -1,23 +1,24 @@
 # Cloud Notes App
 
-Cloud Notes App is a full-stack DevOps learning project built using Next.js, Flask, Docker, Terraform, Kubernetes, and GitHub Actions.  
+Cloud Notes App is a full-stack DevOps learning project built using Next.js, Flask, Docker, Terraform, Kubernetes, and GitHub Actions.
+
 The project demonstrates modern DevOps workflows including containerization, CI/CD automation, Infrastructure as Code (IaC), Kubernetes deployments, scaling, and cloud-ready architecture.
 
 ---
 
 ## Features
 
-- Create and delete notes
-- Full-stack application with frontend and backend
+- Create, edit, and delete notes
+- Full-stack frontend and backend application
 - Dockerized frontend and backend services
 - Multi-container setup using Docker Compose
-- Terraform infrastructure provisioning
+- Terraform infrastructure planning and validation
 - Reusable Terraform modules
 - GitHub Actions CI/CD pipeline
 - Kubernetes deployment using Minikube
-- Kubernetes scaling and rolling updates
-- Multi-environment Kubernetes namespaces
-- AWS-ready infrastructure setup
+- Kubernetes manual replica scaling
+- Kubernetes rolling updates and rollout management
+- AWS-ready infrastructure structure
 
 ---
 
@@ -26,6 +27,7 @@ The project demonstrates modern DevOps workflows including containerization, CI/
 ### Frontend
 - Next.js
 - React
+- TypeScript
 - Tailwind CSS
 
 ### Backend
@@ -42,7 +44,6 @@ The project demonstrates modern DevOps workflows including containerization, CI/
 - GitHub Actions
 - AWS
 - Terragrunt
-- ArgoCD
 
 ---
 
@@ -81,12 +82,24 @@ cd backend
 
 python -m venv venv
 
+# Windows
 venv\Scripts\activate
+
+# macOS/Linux
+source venv/bin/activate
 
 pip install -r requirements.txt
 
 python app.py
 ```
+
+Backend runs on:
+
+```txt
+http://localhost:5000
+```
+
+---
 
 ### Frontend
 
@@ -104,23 +117,22 @@ Frontend runs on:
 http://localhost:3000
 ```
 
-Backend runs on:
-
-```txt
-http://localhost:5000
-```
-
 ---
 
 ## Docker Setup
 
-Run the full application using Docker Compose:
+Run the application using Docker Compose:
 
 ```bash
 docker compose up --build
 ```
 
-This starts:
+### Docker Services
+
+- Frontend → `http://localhost:3000`
+- Backend → `http://localhost:5001`
+
+Docker Compose starts:
 - Frontend container
 - Backend container
 - Shared Docker network
@@ -130,7 +142,7 @@ This starts:
 
 ## Terraform
 
-Terraform is used to provision AWS infrastructure using reusable modules.
+Terraform is used to define and validate AWS infrastructure using reusable modules.
 
 ### Terraform Components
 
@@ -157,7 +169,7 @@ terraform plan -input=false "-var-file=environments/dev/terraform.tfvars"
 
 ## Terraform Plan
 
-Terraform successfully validates and generates infrastructure plan for:
+Terraform successfully validates and generates infrastructure plans for:
 
 - VPC
 - Public Subnet
@@ -182,7 +194,7 @@ GitHub Actions pipeline automatically performs:
 
 - Terraform format check
 - Terraform validation
-- Terraform plan
+- Terraform planning
 - Docker image build
 - CI workflow automation
 
@@ -196,7 +208,7 @@ Application deployed locally using Minikube Kubernetes cluster.
 
 - Deployments
 - Services
-- Scaling
+- Replica scaling
 - Rolling updates
 - Namespace isolation
 - Pod monitoring
@@ -204,9 +216,31 @@ Application deployed locally using Minikube Kubernetes cluster.
 
 <img width="1077" height="362" alt="image" src="https://github.com/user-attachments/assets/2e64f27e-39ef-493a-913c-2ab1599d125b" />
 
-Kubernetes successfully scaled the frontend deployment from 2 to 5 replicas, demonstrating container orchestration, high availability, and auto-scaling capabilities using Minikube.
+Kubernetes successfully scaled the frontend deployment from 2 to 5 replicas, demonstrating container orchestration, high availability, and manual replica scaling using Minikube.
 
 <img width="1215" height="290" alt="image" src="https://github.com/user-attachments/assets/35a66135-b906-4835-98bb-4d7bcc8e1725" />
+
+---
+
+## Terragrunt
+
+Terragrunt configuration is included for reusable multi-environment Terraform structure.
+
+Available environments:
+
+- dev
+- staging
+- prod
+
+Example:
+
+```bash
+cd terragrunt/dev
+
+terragrunt init
+
+terragrunt plan
+```
 
 ---
 
@@ -233,7 +267,7 @@ Terraform Validation & Planning
     ↓
 Docker Image Build
     ↓
-Kubernetes Deployment
+Local Kubernetes Deployment (Minikube)
     ↓
 Scaling & Rollout Management
     ↓
