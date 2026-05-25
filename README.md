@@ -221,6 +221,25 @@ Kubernetes successfully scaled the frontend deployment from 2 to 5 replicas, dem
 <img width="1215" height="290" alt="image" src="https://github.com/user-attachments/assets/35a66135-b906-4835-98bb-4d7bcc8e1725" />
 
 ---
+---
+
+## ArgoCD GitOps
+
+ArgoCD was installed locally using Minikube to demonstrate GitOps-based Kubernetes application management and deployment workflows.
+
+### ArgoCD Features Tested
+
+- ArgoCD installation on Kubernetes
+- GitOps dashboard access
+- Kubernetes cluster connection
+- Application management UI
+- Local GitOps workflow testing
+
+<img width="1918" height="892" alt="image" src="https://github.com/user-attachments/assets/63b5d168-3319-4820-a3ae-cf01bdc53133" />
+
+
+---
+
 
 ## Terragrunt
 
