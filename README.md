@@ -48,3 +48,5 @@ Terraform successfully validates and generates infrastructure plan for:
 Command used:
 
 terraform plan -input=false "-var-file=environments/dev/terraform.tfvars"
+<img width="967" height="517" alt="image" src="https://github.com/user-attachments/assets/b27a06e0-51be-4433-aa90-e4ab8ab1edf4" />
+
