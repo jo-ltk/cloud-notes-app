@@ -33,3 +33,18 @@ Short project intro
 ## CI/CD Pipeline
 
 ## Future Improvements
+
+## Terraform Plan
+
+Terraform successfully validates and generates infrastructure plan for:
+
+- VPC
+- Public Subnet
+- Internet Gateway
+- Route Table
+- Security Group
+- EC2 Instance
+
+Command used:
+
+terraform plan -input=false "-var-file=environments/dev/terraform.tfvars"
