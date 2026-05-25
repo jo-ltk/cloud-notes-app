@@ -54,3 +54,8 @@ terraform plan -input=false "-var-file=environments/dev/terraform.tfvars"
 
 <img width="1077" height="362" alt="image" src="https://github.com/user-attachments/assets/2e64f27e-39ef-493a-913c-2ab1599d125b" />
 
+
+Kubernetes successfully scaled the frontend deployment from 2 to 5 replicas, demonstrating container orchestration, high availability, and auto-scaling capabilities using Minikube
+<img width="1215" height="290" alt="image" src="https://github.com/user-attachments/assets/35a66135-b906-4835-98bb-4d7bcc8e1725" />
+
+
