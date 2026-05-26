@@ -1,4 +1,17 @@
-# AWS provider and Terraform version constraints
+# -----------------------------------------------------------------------------
+# provider.tf — Terraform and AWS provider configuration
+# -----------------------------------------------------------------------------
+# This file tells Terraform:
+#   1. Which Terraform version to use
+#   2. Which cloud provider plugin to download (AWS)
+#   3. Which AWS region to deploy into
+#
+# Beginner flow:
+#   terraform init    → downloads the AWS provider
+#   terraform plan    → previews changes (needs AWS credentials)
+#   terraform apply   → creates/updates real AWS resources
+# -----------------------------------------------------------------------------
+
 terraform {
   required_version = ">= 1.5.0"
 
@@ -9,8 +22,7 @@ terraform {
     }
   }
 
-  # Remote backend: store state in S3, lock with DynamoDB
-  # Uncomment after creating the S3 bucket and DynamoDB table (see README)
+  # Optional later: remote state in S3 (uncomment when you learn state backends)
   # backend "s3" {
   #   bucket         = "your-terraform-state-bucket"
   #   key            = "cloud-notes-app/terraform.tfstate"
@@ -20,9 +32,11 @@ terraform {
   # }
 }
 
+# AWS provider — all resources in this project use this region
 provider "aws" {
   region = var.aws_region
 
+  # Tags applied automatically to every resource that supports tags
   default_tags {
     tags = var.common_tags
   }

@@ -16,12 +16,13 @@ frontend/out/
 # Database (local dev; use volume in Docker)
 backend/database.db
 
-# Terraform
+# Terraform — generated/cache (not part of your architecture)
+terraform/.terraform/
 .terraform/
 *.tfstate
+*.tfstate.backup
 *.tfstate.*
 *.tfvars.backup
-.terraform.lock.hcl
 
 # OS
 .DS_Store

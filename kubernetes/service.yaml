@@ -1,4 +1,13 @@
-# NodePort services expose apps outside the cluster (learning/demo)
+# -----------------------------------------------------------------------------
+# service.yaml — stable network access to your Deployments
+# -----------------------------------------------------------------------------
+# Service: gives pods a stable DNS name and routes traffic to them.
+# selector: must match pod labels in deployment.yaml (app: ...).
+# ports:
+#   port        — port the Service listens on inside the cluster
+#   targetPort  — port on the container (must match containerPort)
+#   nodePort    — port on each node (NodePort type exposes app externally)
+# -----------------------------------------------------------------------------
 ---
 apiVersion: v1
 kind: Service

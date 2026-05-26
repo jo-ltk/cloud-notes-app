@@ -1,4 +1,5 @@
-# Security group: allow HTTP, app ports, and SSH for learning/demo
+# Security group module — firewall rules for the EC2 instance
+# Allows HTTP (80), app ports (3000, 5000), and SSH (22)
 
 resource "aws_security_group" "web" {
   name        = "${var.project_name}-${var.environment}-sg"
@@ -37,6 +38,7 @@ resource "aws_security_group" "web" {
     cidr_blocks = [var.ssh_cidr]
   }
 
+  # Allow all outbound traffic (updates, package installs, etc.)
   egress {
     from_port   = 0
     to_port     = 0

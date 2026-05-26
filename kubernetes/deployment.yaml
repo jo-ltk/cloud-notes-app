@@ -1,4 +1,10 @@
-# Deploy frontend and backend with 2 replicas each
+# -----------------------------------------------------------------------------
+# deployment.yaml — runs your app containers inside Kubernetes
+# -----------------------------------------------------------------------------
+# Deployment: declares desired state (which image, how many copies, ports).
+# replicas: number of identical pods (here: 2 for high availability demo).
+# containers: the Docker images and settings each pod runs.
+# -----------------------------------------------------------------------------
 ---
 apiVersion: apps/v1
 kind: Deployment

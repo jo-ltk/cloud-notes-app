@@ -1,5 +1,13 @@
-# Root module wires VPC, security group, and EC2 together
-# No hardcoded values — everything comes from variables.tf
+# -----------------------------------------------------------------------------
+# main.tf — root module: wires child modules together
+# -----------------------------------------------------------------------------
+# Order matters for dependencies (Terraform figures this out automatically):
+#   1. vpc            → network (VPC, subnet, internet gateway)
+#   2. security_group → firewall rules (needs vpc_id)
+#   3. ec2            → compute instance (needs subnet + security group)
+#
+# Each module lives under ./modules/<name>/ and keeps its own resources.
+# -----------------------------------------------------------------------------
 
 module "vpc" {
   source = "./modules/vpc"

@@ -1,4 +1,4 @@
-# EC2 module: single instance to host Docker/K8s node for learning
+# EC2 module — one virtual server to run Docker or Kubernetes (learning/demo)
 
 resource "aws_instance" "app" {
   ami                    = var.ami_id

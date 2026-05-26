@@ -1,4 +1,5 @@
-# VPC module: network foundation (VPC, subnet, IGW, route table)
+# VPC module — creates the network layer for the app
+# Resources: VPC, public subnet, internet gateway, route table
 
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
@@ -10,6 +11,7 @@ resource "aws_vpc" "main" {
   })
 }
 
+# Internet gateway lets resources in the VPC reach the public internet
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
@@ -18,6 +20,7 @@ resource "aws_internet_gateway" "main" {
   })
 }
 
+# Public subnet: instances here can get a public IP (map_public_ip_on_launch)
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = var.public_subnet_cidr
@@ -29,6 +32,7 @@ resource "aws_subnet" "public" {
   })
 }
 
+# Route table sends 0.0.0.0/0 traffic to the internet gateway
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 

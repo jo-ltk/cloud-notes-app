@@ -1,4 +1,5 @@
-# ArgoCD Application — GitOps: sync manifests from Git to Kubernetes
+# ArgoCD Application — GitOps: sync kubernetes/ manifests from Git automatically
+# Optional advanced topic; apply after ArgoCD is installed on your cluster.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
