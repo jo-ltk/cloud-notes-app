@@ -1,9 +1,7 @@
 # deployment.yaml — tells Kubernetes HOW to run your app
 #
-# Deployment = "I want N copies of this container running."
-# replicas: 2 = two pods per app (demo for scaling / availability)
-# selector + labels = how the Service finds these pods
-# containers = which Docker image, which port, env vars
+# Images are pulled from Docker Hub (built & pushed by GitHub Actions).
+# Replace YOUR_DOCKERHUB_USERNAME with your real Docker Hub username.
 #
 # Apply: kubectl apply -f kubernetes/deployment.yaml
 # -----------------------------------------------------------------------------
@@ -27,8 +25,10 @@ spec:
     spec:
       containers:
         - name: backend
-          image: cloud-notes-app-backend:latest
-          imagePullPolicy: IfNotPresent
+          # Example: johndoe/cloud-notes-backend:latest
+          image: YOUR_DOCKERHUB_USERNAME/cloud-notes-backend:latest
+          # Always pull from registry so new :latest builds are picked up
+          imagePullPolicy: Always
           ports:
             - containerPort: 5000
           env:
@@ -36,7 +36,6 @@ spec:
               value: /app/database.db
 ---
 # Frontend — Next.js on port 3000
-# NEXT_PUBLIC_API_URL uses the backend Service name (DNS inside the cluster)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -55,10 +54,12 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: cloud-notes-app-frontend:latest
-          imagePullPolicy: IfNotPresent
+          # Example: johndoe/cloud-notes-frontend:latest
+          image: YOUR_DOCKERHUB_USERNAME/cloud-notes-frontend:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 3000
           env:
+            # Baked in at image build time; kept for documentation
             - name: NEXT_PUBLIC_API_URL
               value: http://cloud-notes-backend:5000

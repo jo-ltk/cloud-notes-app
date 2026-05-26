@@ -1,5 +1,12 @@
-# CI/CD — validate Terraform and build Docker images on push/PR
-# Requires GitHub secrets: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+# CI/CD — validate Terraform, build Docker images, push to Docker Hub on main
+#
+# GitHub repository secrets (Settings → Secrets and variables → Actions):
+#   AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY  — Terraform plan
+#   DOCKERHUB_USERNAME, DOCKERHUB_TOKEN       — build & push images
+#
+# Images published (on push to main):
+#   <DOCKERHUB_USERNAME>/cloud-notes-backend:latest
+#   <DOCKERHUB_USERNAME>/cloud-notes-frontend:latest
 name: Cloud Notes CI
 
 on:
@@ -50,17 +57,43 @@ jobs:
         run: terraform plan -input=false -var-file=terraform.tfvars -no-color
 
   docker:
-    name: Build Docker Images
+    name: Build & Push Docker Images
     runs-on: ubuntu-latest
+    # Only push when merging to main (PRs still build to verify Dockerfiles)
+    env:
+      PUSH_IMAGES: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build backend image
-        run: docker build -f docker/backend.Dockerfile -t cloud-notes-backend:latest .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Build frontend image
-        run: |
-          docker build -f docker/frontend.Dockerfile \
-            --build-arg NEXT_PUBLIC_API_URL=http://localhost:5000 \
-            -t cloud-notes-frontend:latest .
+      - name: Log in to Docker Hub
+        if: env.PUSH_IMAGES == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/backend.Dockerfile
+          push: ${{ env.PUSH_IMAGES == 'true' }}
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/cloud-notes-backend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/cloud-notes-backend:${{ github.sha }}
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/frontend.Dockerfile
+          push: ${{ env.PUSH_IMAGES == 'true' }}
+          build-args: |
+            NEXT_PUBLIC_API_URL=http://cloud-notes-backend:5000
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/cloud-notes-frontend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/cloud-notes-frontend:${{ github.sha }}

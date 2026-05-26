@@ -18,17 +18,17 @@ Learn modern DevOps workflow from development → containerization → infrastru
 # Project Flow
 
 ```text
-Developer Push
+Developer Push → GitHub
     ↓
-GitHub Actions CI/CD
+GitHub Actions (CI)
+    ├── Terraform validate & plan (AWS)
+    └── Docker build → push to Docker Hub (main branch)
     ↓
-Terraform Validation & Planning
+Kubernetes pulls images from Docker Hub
     ↓
-Docker Image Build
+ArgoCD syncs cluster from Git (optional, when configured)
     ↓
-Kubernetes Deployment (Minikube)
-    ↓
-Scaling & Rollout Management
+Terraform provisions AWS infrastructure
     ↓
 Cloud Notes App Running
 ```
@@ -190,19 +190,37 @@ Terragrunt helps manage Terraform environments using the same infrastructure cod
 Pipeline Flow:
 
 1. Checkout code
-2. Setup Terraform
-3. Configure AWS credentials
-4. Terraform fmt
-5. Terraform init
-6. Terraform validate
-7. Terraform plan
-8. Docker image build
+2. Setup Terraform → fmt, init, validate, plan (AWS)
+3. Build Docker images (frontend + backend)
+4. On push to **main**: log in to Docker Hub and **push** images
 
 CI/CD automates:
 
-* Terraform validation
-* Terraform planning
-* Docker image builds
+* Terraform validation and planning
+* Docker image builds on every push/PR
+* Docker Hub publish on merge to `main`
+
+### Docker Hub secrets (required for push)
+
+In GitHub: **Settings → Secrets and variables → Actions → New repository secret**
+
+| Secret name | Value |
+|-------------|--------|
+| `DOCKERHUB_USERNAME` | Your Docker Hub username |
+| `DOCKERHUB_TOKEN` | Docker Hub **Access Token** (Account Settings → Security → New Access Token) |
+| `AWS_ACCESS_KEY_ID` | (existing) Terraform |
+| `AWS_SECRET_ACCESS_KEY` | (existing) Terraform |
+
+Do **not** use your Docker Hub password in CI; use a token.
+
+### Image names
+
+After CI runs on `main`, images are available as:
+
+* `<username>/cloud-notes-backend:latest`
+* `<username>/cloud-notes-frontend:latest`
+
+Update `kubernetes/deployment.yaml`: replace `YOUR_DOCKERHUB_USERNAME` with your username, then `kubectl apply -f kubernetes/`.
 
 ![GitHub Actions](assets/screenshots/github-actions.png)
 
@@ -211,12 +229,14 @@ CI/CD automates:
 # Kubernetes
 
 kubernetes/
-→ manages Docker containers automatically
+→ runs containers from **Docker Hub** (not local Minikube images)
 
 Files:
 
-* deployment.yaml
+* deployment.yaml — image: `<dockerhub-user>/cloud-notes-backend:latest`
 * service.yaml
+
+Before first deploy, edit `deployment.yaml` and set your Docker Hub username.
 
 Kubernetes Features Tested:
 
