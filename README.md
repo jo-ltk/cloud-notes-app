@@ -39,6 +39,7 @@ The project demonstrates modern DevOps workflows including containerization, CI/
 - Docker
 - Docker Compose
 - Terraform
+- Terragrunt (optional wrapper — see `terragrunt/`)
 - Kubernetes
 - Minikube
 - GitHub Actions
@@ -173,6 +174,16 @@ terraform apply -var-file=terraform.tfvars
 ```
 
 Generated locally (do not commit): `terraform/.terraform/`, `*.tfstate`. Keep `.terraform.lock.hcl` for stable provider versions.
+
+### Terragrunt (optional next step)
+
+Same infrastructure, different folder — learn how teams wrap Terraform without duplicating modules. See [`terragrunt/README.md`](terragrunt/README.md).
+
+```bash
+cd terragrunt/dev
+terragrunt init
+terragrunt plan
+```
 
 ---
 

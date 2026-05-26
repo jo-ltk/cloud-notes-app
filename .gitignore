@@ -16,9 +16,11 @@ frontend/out/
 # Database (local dev; use volume in Docker)
 backend/database.db
 
-# Terraform — generated/cache (not part of your architecture)
+# Terraform / Terragrunt — generated cache (not part of your architecture)
 terraform/.terraform/
 .terraform/
+.terragrunt-cache/
+terragrunt/**/.terragrunt-cache/
 *.tfstate
 *.tfstate.backup
 *.tfstate.*

@@ -3,6 +3,7 @@ node_modules
 .git
 .github
 terraform
+terragrunt
 kubernetes
 *.md
 .env
