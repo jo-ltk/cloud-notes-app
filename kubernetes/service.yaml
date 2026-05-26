@@ -1,14 +1,16 @@
-# -----------------------------------------------------------------------------
-# service.yaml — stable network access to your Deployments
-# -----------------------------------------------------------------------------
-# Service: gives pods a stable DNS name and routes traffic to them.
-# selector: must match pod labels in deployment.yaml (app: ...).
-# ports:
-#   port        — port the Service listens on inside the cluster
-#   targetPort  — port on the container (must match containerPort)
-#   nodePort    — port on each node (NodePort type exposes app externally)
+# service.yaml — gives your pods a stable name and a way to reach them
+#
+# Service = stable network endpoint for pods that match the selector.
+# type: NodePort = expose the app on a fixed port on each cluster node (good for Minikube).
+#
+# port       — port the Service listens on inside the cluster (other pods use this)
+# targetPort — port on the container (must match containerPort in deployment.yaml)
+# nodePort   — port on the node you open in the browser (Minikube: minikube service ...)
+#
+# Apply: kubectl apply -f kubernetes/service.yaml
 # -----------------------------------------------------------------------------
 ---
+# Backend Service — routes traffic to pods labeled app: cloud-notes-backend
 apiVersion: v1
 kind: Service
 metadata:
@@ -22,6 +24,7 @@ spec:
       targetPort: 5000
       nodePort: 30500
 ---
+# Frontend Service — routes traffic to pods labeled app: cloud-notes-frontend
 apiVersion: v1
 kind: Service
 metadata:

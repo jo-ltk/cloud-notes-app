@@ -222,9 +222,10 @@ GitHub Actions (`.github/workflows/ci.yml`) on push/PR:
 
 ## Kubernetes Deployment
 
-- `kubernetes/deployment.yaml` — backend and frontend Deployments (2 replicas each)
-- `kubernetes/service.yaml` — NodePort Services for cluster access
-- `kubernetes/argocd-application.yaml` — optional GitOps with ArgoCD
+Two files only:
+
+- `kubernetes/deployment.yaml` — runs backend and frontend (2 replicas each)
+- `kubernetes/service.yaml` — NodePort access to both apps
 
 ```bash
 kubectl apply -f kubernetes/deployment.yaml
@@ -251,29 +252,12 @@ Kubernetes successfully scaled the frontend deployment from 2 to 5 replicas, dem
 
 ---
 
-## ArgoCD GitOps
-
-ArgoCD was installed locally using Minikube to demonstrate GitOps-based Kubernetes application management and deployment workflows.
-
-### ArgoCD Features Tested
-
-- ArgoCD installation on Kubernetes
-- GitOps dashboard access
-- Kubernetes cluster connection
-- Application management UI
-- Local GitOps workflow testing
-
-<img width="1918" height="892" alt="image" src="https://github.com/user-attachments/assets/63b5d168-3319-4820-a3ae-cf01bdc53133" />
-
----
-
 ## Future Improvements
 
 - Deploy infrastructure fully on AWS
 - Configure Terraform remote backend using S3 + DynamoDB
 - Push Docker images to Docker Hub or Amazon ECR
 - Deploy Kubernetes cluster using EKS
-- Configure live ArgoCD GitOps sync
 - Add monitoring and logging tools
 - Add authentication and database improvements
 

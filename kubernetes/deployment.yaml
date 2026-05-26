@@ -1,11 +1,14 @@
-# -----------------------------------------------------------------------------
-# deployment.yaml — runs your app containers inside Kubernetes
-# -----------------------------------------------------------------------------
-# Deployment: declares desired state (which image, how many copies, ports).
-# replicas: number of identical pods (here: 2 for high availability demo).
-# containers: the Docker images and settings each pod runs.
+# deployment.yaml — tells Kubernetes HOW to run your app
+#
+# Deployment = "I want N copies of this container running."
+# replicas: 2 = two pods per app (demo for scaling / availability)
+# selector + labels = how the Service finds these pods
+# containers = which Docker image, which port, env vars
+#
+# Apply: kubectl apply -f kubernetes/deployment.yaml
 # -----------------------------------------------------------------------------
 ---
+# Backend — Flask API on port 5000
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -31,13 +34,9 @@ spec:
           env:
             - name: DATABASE_PATH
               value: /app/database.db
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 5000
-            initialDelaySeconds: 10
-            periodSeconds: 10
 ---
+# Frontend — Next.js on port 3000
+# NEXT_PUBLIC_API_URL uses the backend Service name (DNS inside the cluster)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
