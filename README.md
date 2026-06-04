@@ -39,6 +39,7 @@ Cloud Notes App Running
 
 ![Architecture Diagram](assets/screenshots/architecture.png)
 
+
 Frontend
 ↓
 Backend API
@@ -55,7 +56,8 @@ CI/CD Automation
 
 # Application UI
 
-![Notes App UI](assets/screenshots/app-ui.png)
+<img width="367" height="740" alt="image" src="https://github.com/user-attachments/assets/7c4ab83e-54d5-4b28-984e-2a5ab7cba7c2" />
+
 
 Frontend built using:
 
