@@ -33,30 +33,12 @@ Terraform provisions AWS infrastructure
 Cloud Notes App Running
 ```
 
----
-
-# Architecture
-
-![Architecture Diagram](assets/screenshots/architecture.png)
-
-
-Frontend
-↓
-Backend API
-↓
-Docker Containers
-↓
-Kubernetes
-↓
-Terraform Infrastructure
-↓
-CI/CD Automation
 
 ---
 
 # Application UI
 
-<img width="367" height="740" alt="image" src="https://github.com/user-attachments/assets/7c4ab83e-54d5-4b28-984e-2a5ab7cba7c2" />
+//![Notes App UI](assets/screenshots/app-ui.png)
 
 
 Frontend built using:
