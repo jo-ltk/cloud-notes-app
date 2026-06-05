@@ -32,6 +32,7 @@ Terraform provisions AWS infrastructure
     ↓
 Cloud Notes App Running
 ```
+<img width="367" height="740" alt="Screenshot 2026-06-04 082551" src="https://github.com/user-attachments/assets/399645b1-5e34-42da-a4b4-b4c46c3d0b9a" />
 
 
 ---
